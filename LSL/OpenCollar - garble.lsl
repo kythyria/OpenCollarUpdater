@@ -93,6 +93,17 @@ string GetScriptID()
     return llStringTrim(llList2String(parts, 1), STRING_TRIM) + "_";
 }
 
+string getAvatarName(key avatar)
+{
+    string displayname = llGetDisplayName(avatar);
+    if (displayname != "" && displayname != "???") { return displayname; }
+    
+    string username = llKey2Name(llGetOwner());
+    list namelist = llParseString2List(username, [" "], []);
+    if (llList2String(namelist, 1) == "Resident") { return llList2String(namelist, 1);}
+    return username;
+}
+
 string PeelToken(string in, integer slot)
 {
     integer i = llSubStringIndex(in, "_");
@@ -105,7 +116,7 @@ SetPrefix(string in)
     if (in != "auto") gsPref = in;
     else
     {
-        string sName = llKey2Name(g_kWearer);
+        string sName = getAvatarName(g_kWearer);
         integer i = llSubStringIndex(sName, " ") + 1;
         string init = llGetSubString(sName, 0, 0) + llGetSubString(sName, i, i);
         gsPref = llToLower(init);
@@ -143,7 +154,7 @@ bind(key _k, integer auth)
     llMessageLinked(LINK_SET, RLV_CMD, "redirchat:" + (string)giCRC + "=add,chatshout=n,sendim=n", NULL_KEY);
     if (llGetAgentSize(_k) != ZERO_VECTOR)
     {
-        if (_k != g_kWearer) llOwnerSay(llKey2Name(_k) + " ordered you to be quiet");
+        if (_k != g_kWearer) llOwnerSay(getAvatarName(_k) + " ordered you to be quiet");
         Notify(_k, WEARERNAME + "'s speech is now garbled", FALSE);
     }
     llMessageLinked(LINK_THIS, auth, "menu "+g_sParentMenu, _k);
@@ -182,7 +193,7 @@ integer UserCommand(integer iNum, string sStr, key kID)
     else if (sStr == "menu " + UNGARBLE || llToLower(sStr) == "garble off")
     {
         if (iNum <= g_iBinder) release(kID,iNum);
-        else Notify(kID, "Sorry, " + llKey2Name(kID) + ", the garbler can only be released by someone with an equal or higher rank than the person who set it.", FALSE);
+        else Notify(kID, "Sorry, " + getAvatarName(kID) + ", the garbler can only be released by someone with an equal or higher rank than the person who set it.", FALSE);
     }
     else return FALSE;
     return TRUE;
@@ -196,7 +207,7 @@ default {
     state_entry() {
         //llSetMemoryLimit(65536);  //this script needs to be profiled, and its memory limited
         g_kWearer = llGetOwner();
-        WEARERNAME = llKey2Name(g_kWearer);  //quick and dirty default, will get replaced by value from settings
+        WEARERNAME = getAvatarName(g_kWearer);  //quick and dirty default, will get replaced by value from settings
         
         giCRC = llRound(llFrand(499) + 1);
         if (bOn) release(g_kWearer,0);
