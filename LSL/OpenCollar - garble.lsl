@@ -116,7 +116,7 @@ SetPrefix(string in)
     if (in != "auto") gsPref = in;
     else
     {
-        string sName = getAvatarName(g_kWearer);
+        string sName = llKey2Name(g_kWearer);
         integer i = llSubStringIndex(sName, " ") + 1;
         string init = llGetSubString(sName, 0, 0) + llGetSubString(sName, i, i);
         gsPref = llToLower(init);
